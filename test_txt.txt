@@ -1,0 +1,6 @@
+This is a test file for profanity detector
+
+Shot! This line is clean.
+
+Shit! this line is not clean.
+
