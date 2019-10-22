@@ -20,3 +20,71 @@ class generateFeatureStats(Resource):
 
         return 201
 
+
+
+class CohortCharacterstics():
+    def __init__(self, inp_form=None, input_path=None, db_url=None, schema=None, table=None, observation_ids=None, selection_criteria=None):
+        # Access the dictionary from the object store
+        columnList = observation_ids
+        columnStr = ','.join(columnList)
+
+        #output_log = open("./data_quality_check_log.txt", "w")
+        print (columnList)
+
+        print(columnStr)
+
+
+        if inp_form == "file":
+            file_name = os.path.basename(input_path)
+            sc = SparkContext()
+            sqlContext = SQLContext(sc)
+
+            # read file
+            input_fileformat = os.path.splitext(input_path)[1][1:].strip().lower()
+            df = sqlContext.read.load(input_path, format=input_fileformat, inferSchema=True, header=True)
+
+            print (df)
+        else:
+            engine = sqlalchemy.create_engine(db_url, echo=True)
+            db_conn = engine.connect()
+
+            query_str = ''' SELECT {0} 
+                            FROM {1}.{2}'''.format(columnStr,schema,table)
+
+            print (query_str)
+
+            #result = pd.read_sql_query(query_str, db_conn)
+            #print (result)
+
+from analytics_toolsets import DataDict, DataQuality, CohortCharacterstics
+
+
+
+@analytics_toolsets.route('/cohortStatistics',methods=['PUT'])
+class generateCohortStats(Resource):
+    resource_fields = api.model('Resource', {
+        'input_format': fields.String(enum=["file", "db"]),
+        'input_path': fields.String,
+        'db_url': fields.String,
+        'schema': fields.String,
+        'table': fields.String,
+        'oids': fields.List(fields.String),
+        'selection_criteria': fields.List(fields.String)
+    })
+    @api.response(*response_400)
+    @api.expect(resource_fields)
+    def put(self):
+        """Creates cohort characterstics from a dataset or replaces the existing cohort statistics with a given one"""
+        data = request.json
+
+        try:
+            # add cohort stats by their own and upload from object store
+            if data['input_format'] == 'file':
+                CohortCharacterstics(inp_form=data['input_format'], input_path=data['input_path'],
+                                          observation_ids=data['oids'],selection_criteria=data['selection_criteria'])
+            else:
+                CohortCharacterstics(inp_form=data['input_format'], db_url=data['db_url'],
+                    schema=data['schema'], table=data['table'], observation_ids=data['oids'],selection_criteria=data['selection_criteria'])
+        except Exception as e:
+            raise exceptions.ParseError("Unable to generate Cohort Statistics for this input")
+        return 201
