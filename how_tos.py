@@ -88,3 +88,95 @@ class generateCohortStats(Resource):
         except Exception as e:
             raise exceptions.ParseError("Unable to generate Cohort Statistics for this input")
         return 201
+Feature selections algorithm
+
+Recursive Feature Elimination
+
+# Recursive Feature Elimination
+from sklearn import datasets
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
+# load the iris datasets
+dataset = datasets.load_iris()
+# create a base classifier used to evaluate a subset of attributes
+model = LogisticRegression()
+# create the RFE model and select 3 attributes
+rfe = RFE(model, 3)
+rfe = rfe.fit(dataset.data, dataset.target)
+# summarize the selection of the attributes
+print(rfe.support_)
+print(rfe.ranking_)
+
+Feature Importance
+
+# Feature Importance
+from sklearn import datasets
+from sklearn import metrics
+from sklearn.ensemble import ExtraTreesClassifier
+# load the iris datasets
+dataset = datasets.load_iris()
+# fit an Extra Trees model to the data
+model = ExtraTreesClassifier()
+model.fit(dataset.data, dataset.target)
+# display the relative importance of each attribute
+print(model.feature_importances_)
+
+
+Remove redundant features
+
+# ensure the results are repeatable
+set.seed(7)
+# load the library
+library(mlbench)
+library(caret)
+# load the data
+data(PimaIndiansDiabetes)
+# calculate correlation matrix
+correlationMatrix <- cor(PimaIndiansDiabetes[,1:8])
+# summarize the correlation matrix
+print(correlationMatrix)
+# find attributes that are highly corrected (ideally >0.75)
+highlyCorrelated <- findCorrelation(correlationMatrix, cutoff=0.5)
+# print indexes of highly correlated attributes
+print(highlyCorrelated)
+
+Rank features by Importance
+
+# ensure results are repeatable
+set.seed(7)
+# load the library
+library(mlbench)
+library(caret)
+# load the dataset
+data(PimaIndiansDiabetes)
+# prepare training scheme
+control <- trainControl(method="repeatedcv", number=10, repeats=3)
+# train the model
+model <- train(diabetes~., data=PimaIndiansDiabetes, method="lvq", preProcess="scale", trControl=control)
+# estimate variable importance
+importance <- varImp(model, scale=FALSE)
+# summarize importance
+print(importance)
+# plot importance
+plot(importance)
+
+
+Feature Selection
+
+# ensure the results are repeatable
+set.seed(7)
+# load the library
+library(mlbench)
+library(caret)
+# load the data
+data(PimaIndiansDiabetes)
+# define the control using a random forest selection function
+control <- rfeControl(functions=rfFuncs, method="cv", number=10)
+# run the RFE algorithm
+results <- rfe(PimaIndiansDiabetes[,1:8], PimaIndiansDiabetes[,9], sizes=c(1:8), rfeControl=control)
+# summarize the results
+print(results)
+# list the chosen features
+predictors(results)
+# plot the results
+plot(results, type=c("g", "o"))
