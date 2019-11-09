@@ -1,3 +1,4 @@
-# StudyProjects
+ud120-projects
+==============
 
-Here is a list of programs for python beginners
+Starter project code for students taking Udacity ud120
